@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: merged-bingo-backend
+    name: merged-bingo
     env: node
     rootDir: backend
-    buildCommand: npm install
+    buildCommand: npm install && cd ../frontend && npm install && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -13,7 +13,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGIN
-        value: https://merged-bingo-frontend.onrender.com
+        value: https://merged-bingo.onrender.com
       - key: PLATFORM_FEE_PERCENT
         value: 25
       - key: STAKE_TIERS
@@ -30,16 +30,6 @@ services:
         fromDatabase:
           name: merged-bingo-db
           property: connectionString
-
-  - type: web
-    name: merged-bingo-frontend
-    env: static
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    envVars:
-      - key: VITE_API_URL
-        value: https://merged-bingo-backend.onrender.com
 
   - type: psql
     name: merged-bingo-db

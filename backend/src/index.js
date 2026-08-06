@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const { Server } = require('socket.io');
@@ -30,15 +31,26 @@ app.use('/api/admin', adminRoutes);
 const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
 const frontendIndexPath = path.join(frontendDistPath, 'index.html');
 
-if (require('fs').existsSync(frontendDistPath)) {
+if (fs.existsSync(frontendDistPath)) {
   app.use(express.static(frontendDistPath));
-  app.get('*', (req, res) => {
-    if (req.path.startsWith('/api/')) {
-      return res.status(404).json({ error: 'Not found' });
-    }
-    res.sendFile(frontendIndexPath);
-  });
 }
+
+app.get('/', (req, res) => {
+  if (fs.existsSync(frontendIndexPath)) {
+    return res.sendFile(frontendIndexPath);
+  }
+  res.type('html').send(`<!doctype html><html><body><h1>Merged Bingo</h1><p>The app is running.</p></body></html>`);
+});
+
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  if (fs.existsSync(frontendIndexPath)) {
+    return res.sendFile(frontendIndexPath);
+  }
+  res.status(404).send('Not found');
+});
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: allowedOrigins } });

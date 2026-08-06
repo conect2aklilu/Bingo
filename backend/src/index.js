@@ -28,15 +28,21 @@ app.use('/api/wallet', walletRoutes);
 app.use('/api/games', gameRoutes);
 app.use('/api/admin', adminRoutes);
 
-const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
-const frontendIndexPath = path.join(frontendDistPath, 'index.html');
+const candidatePaths = [
+  path.resolve(__dirname, '../../frontend/dist'),
+  path.resolve(process.cwd(), 'frontend/dist'),
+  path.resolve(process.cwd(), 'dist'),
+];
 
-if (fs.existsSync(frontendDistPath)) {
+const frontendDistPath = candidatePaths.find((candidate) => fs.existsSync(candidate));
+const frontendIndexPath = frontendDistPath ? path.join(frontendDistPath, 'index.html') : null;
+
+if (frontendDistPath) {
   app.use(express.static(frontendDistPath));
 }
 
 app.get('/', (req, res) => {
-  if (fs.existsSync(frontendIndexPath)) {
+  if (frontendIndexPath && fs.existsSync(frontendIndexPath)) {
     return res.sendFile(frontendIndexPath);
   }
   res.type('html').send(`<!doctype html><html><body><h1>Merged Bingo</h1><p>The app is running.</p></body></html>`);
@@ -46,7 +52,7 @@ app.get('*', (req, res) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'Not found' });
   }
-  if (fs.existsSync(frontendIndexPath)) {
+  if (frontendIndexPath && fs.existsSync(frontendIndexPath)) {
     return res.sendFile(frontendIndexPath);
   }
   res.status(404).send('Not found');

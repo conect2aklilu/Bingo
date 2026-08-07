@@ -37,7 +37,6 @@ export default function Login() {
     <div style={{ width: 'min(100%, 360px)', margin: '48px auto', padding: 24, background: '#1a2432', borderRadius: 12 }}>
       <AppHeader
         title={t('brandTitle')}
-        subtitle={t('brandSubtitle')}
         language={language}
         setLanguage={(lang) => setLanguage(lang as any)}
       />

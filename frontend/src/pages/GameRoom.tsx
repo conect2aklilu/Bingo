@@ -21,6 +21,7 @@ export default function GameRoom() {
   const [message, setMessage] = useState('');
   const [countdownSeconds, setCountdownSeconds] = useState<number>(0);
   const [latestNumber, setLatestNumber] = useState<number | null>(null);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
 
   useEffect(() => {
     if (!token) return;
@@ -42,7 +43,7 @@ export default function GameRoom() {
     const handleNumberCalled = (data: any) => {
       setCalledNumbers(data.calledNumbers);
       setLatestNumber(data.number);
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      if (voiceEnabled && typeof window !== 'undefined' && 'speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(data.number.toString());
         utterance.lang = 'am-ET';
         window.speechSynthesis.cancel();
@@ -65,7 +66,7 @@ export default function GameRoom() {
       socket.off('number_called', handleNumberCalled);
       socket.off('game_over', handleGameOver);
     };
-  }, [stake, token, refreshBalance, language]);
+  }, [stake, token, refreshBalance, language, voiceEnabled]);
 
   useEffect(() => {
     if (status !== 'countdown' || !countdownEndsAt) return;
@@ -92,10 +93,18 @@ export default function GameRoom() {
         <button onClick={() => nav('/lobby')} style={{ background: 'none', border: '1px solid #29384a', color: '#eef2f6', padding: '6px 10px', borderRadius: 6, cursor: 'pointer' }}>
           {t('backToLobby')}
         </button>
-        <select value={language} onChange={(e) => setLanguage(e.target.value as any)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #29384a', background: '#0f1720', color: '#eef2f6' }}>
-          <option value="en">English</option>
-          <option value="am">አማርኛ</option>
-        </select>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button
+            onClick={() => setVoiceEnabled((prev) => !prev)}
+            style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid #29384a', background: voiceEnabled ? '#0f766e' : '#374151', color: '#fff', cursor: 'pointer' }}
+          >
+            {voiceEnabled ? '🔊 ድምፅ' : '🔈 ድምፅ'}
+          </button>
+          <select value={language} onChange={(e) => setLanguage(e.target.value as any)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #29384a', background: '#0f1720', color: '#eef2f6' }}>
+            <option value="en">English</option>
+            <option value="am">አማርኛ</option>
+          </select>
+        </div>
       </div>
 
       <h2>{t('brand')} — {t('table')}: {stake} Birr</h2>

@@ -44,7 +44,7 @@ export default function GameRoom() {
       setLatestNumber(data.number);
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(data.number.toString());
-        utterance.lang = language === 'am' ? 'am-ET' : 'en-US';
+        utterance.lang = 'am-ET';
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(utterance);
       }

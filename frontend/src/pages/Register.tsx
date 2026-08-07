@@ -34,8 +34,8 @@ export default function Register() {
   }
 
   return (
-    <div style={{ maxWidth: 360, margin: '80px auto', padding: 24, background: '#1a2432', borderRadius: 12 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+    <div style={{ width: 'min(100%, 360px)', margin: '48px auto', padding: 24, background: '#1a2432', borderRadius: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, gap: 12, flexWrap: 'wrap' }}>
         <h2 style={{ margin: 0 }}>{t('brand')}</h2>
         <select value={language} onChange={(e) => setLanguage(e.target.value as any)} style={{ ...inputStyle, width: 110, marginBottom: 0 }}>
           <option value="en">English</option>

@@ -44,17 +44,17 @@ export default function Lobby() {
   }
 
   return (
-    <div style={{ maxWidth: 720, margin: '40px auto', padding: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h2>🎮 {t('brand')}</h2>
-        <div>
-          <span style={{ marginRight: 16 }}>💰 {Number(user?.balance ?? 0).toFixed(2)} Birr</span>
-          <select value={language} onChange={(e) => setLanguage(e.target.value as any)} style={{ marginRight: 12, padding: '4px 8px', borderRadius: 6, border: '1px solid #29384a', background: '#0f1720', color: '#eef2f6' }}>
+    <div style={{ width: 'min(100%, 720px)', margin: '24px auto', padding: 16 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+        <h2 style={{ margin: 0 }}>🎮 {t('brand')}</h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
+          <span>💰 {Number(user?.balance ?? 0).toFixed(2)} Birr</span>
+          <select value={language} onChange={(e) => setLanguage(e.target.value as any)} style={{ marginRight: 0, padding: '4px 8px', borderRadius: 6, border: '1px solid #29384a', background: '#0f1720', color: '#eef2f6' }}>
             <option value="en">English</option>
             <option value="am">አማርኛ</option>
           </select>
-          <Link to="/wallet" style={{ marginRight: 16 }}>{t('walletTitle')}</Link>
-          {(user?.is_admin || user?.isAdmin) && <Link to="/admin" style={{ marginRight: 16 }}>{t('adminPanel')}</Link>}
+          <Link to="/wallet" style={{ marginRight: 0 }}>{t('walletTitle')}</Link>
+          {(user?.is_admin || user?.isAdmin) && <Link to="/admin" style={{ marginRight: 0 }}>{t('adminPanel')}</Link>}
           <button onClick={logout} style={{ background: 'none', border: '1px solid #29384a', color: '#eef2f6', padding: '6px 10px', borderRadius: 6, cursor: 'pointer' }}>
             Logout
           </button>
@@ -63,7 +63,7 @@ export default function Lobby() {
 
       {error && <div style={{ color: '#f87171', marginBottom: 12 }}>{error}</div>}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         {tables.map((table) => (
           <div key={table.stake} style={{ background: '#1a2432', borderRadius: 12, padding: 16 }}>
             <h3>{t('table')}: {table.stake} Birr</h3>

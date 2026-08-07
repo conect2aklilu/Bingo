@@ -170,8 +170,8 @@ async function endGame(table, { winnerId, pattern, cancelled }) {
     await pool.query(`UPDATE games SET status = 'cancelled', ended_at = NOW() WHERE id = $1`, [gameId]);
     ioRef.to(roomName(stake)).emit('game_over', { gameId, cancelled: true });
   } else {
-    const payout = Math.round(pot * (1 - PLATFORM_FEE_PERCENT / 100) * 100) / 100;
-    const fee = Math.round((pot - payout) * 100) / 100;
+    const fee = Number((pot * PLATFORM_FEE_PERCENT / 100).toFixed(2));
+    const payout = Number((pot - fee).toFixed(2));
 
     await pool.query(`UPDATE users SET balance = balance + $1 WHERE id = $2`, [payout, winnerId]);
     await pool.query(
@@ -183,7 +183,7 @@ async function endGame(table, { winnerId, pattern, cancelled }) {
       [winnerId, pattern, payout, fee, pot, gameId]
     );
 
-    ioRef.to(roomName(stake)).emit('game_over', { gameId, winnerId, pattern, payout, cancelled: false });
+    ioRef.to(roomName(stake)).emit('game_over', { gameId, winnerId, pattern, payout, platformFee: fee, cancelled: false });
   }
 
   // Reset table for next round.

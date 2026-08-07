@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 export type Language = 'en' | 'am';
 
 const translations: Record<string, Record<Language, string>> = {
-  brand: { en: 'Yene Bingo', am: 'የኔ ቢንጎ' },
+  brand: { en: 'AJ', am: 'AJ' },
   loginTitle: { en: 'Welcome back', am: 'እንኳን በደህና ተመለሱ' },
   registerTitle: { en: 'Create account', am: 'መለያ ይፍጠሩ' },
   username: { en: 'Username', am: 'የተጠቃሚ ስም' },

@@ -71,6 +71,17 @@ export default function GameRoom() {
   const { refreshBalance, token } = useAuth();
   const { t, language, setLanguage } = useLanguage();
 
+  const audioMap = React.useMemo(() => {
+    if (typeof window === 'undefined') return {} as Record<number, HTMLAudioElement>;
+    const map: Record<number, HTMLAudioElement> = {};
+    for (let i = 1; i <= 75; i += 1) {
+      const audio = new Audio(`/audio/am/number-${String(i).padStart(2, '0')}.mp3`);
+      audio.preload = 'auto';
+      map[i] = audio;
+    }
+    return map;
+  }, []);
+
   const initialCards = (location.state as any)?.cards || [];
   const [cards] = useState<number[][][]>(initialCards);
   const [calledNumbers, setCalledNumbers] = useState<number[]>([]);
@@ -102,8 +113,16 @@ export default function GameRoom() {
     const handleNumberCalled = (data: any) => {
       setCalledNumbers(data.calledNumbers);
       setLatestNumber(data.number);
-      if (voiceEnabled) {
-        speakNumber(data.number, language);
+      if (!voiceEnabled) return;
+
+      const number = Number(data.number);
+      const audio = audioMap[number];
+      if (language === 'am' && audio) {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.play().catch(() => speakNumber(number, language));
+      } else {
+        speakNumber(number, language);
       }
     };
 

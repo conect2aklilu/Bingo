@@ -78,6 +78,7 @@ export default function Wallet() {
         balance={Number(balance)}
         language={language}
         setLanguage={(lang) => setLanguage(lang as any)}
+        backTo="/lobby"
         showLogout
         onLogout={logout}
       />

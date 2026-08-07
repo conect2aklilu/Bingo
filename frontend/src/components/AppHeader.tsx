@@ -10,6 +10,8 @@ interface AppHeaderProps {
   setLanguage: (lang: Language) => void;
   showLogout?: boolean;
   onLogout?: () => void;
+  showAdminLink?: boolean;
+  adminLink?: string;
   showWalletLink?: boolean;
   walletLink?: string;
   backTo?: string;
@@ -23,6 +25,8 @@ export default function AppHeader({
   setLanguage,
   showLogout,
   onLogout,
+  showAdminLink,
+  adminLink,
   showWalletLink,
   walletLink,
   backTo,
@@ -86,6 +90,22 @@ export default function AppHeader({
           <option value="en">English</option>
           <option value="am">አማርኛ</option>
         </select>
+        {showAdminLink && adminLink ? (
+          <Link
+            to={adminLink}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 10,
+              border: '1px solid rgba(226, 232, 240, 0.4)',
+              background: '#475569',
+              color: '#ffffff',
+              textDecoration: 'none',
+              fontWeight: 700,
+            }}
+          >
+            Admin
+          </Link>
+        ) : null}
         {showWalletLink && walletLink ? (
           <Link
             to={walletLink}

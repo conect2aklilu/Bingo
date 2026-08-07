@@ -94,6 +94,11 @@ export default function GameRoom() {
   const [countdownSeconds, setCountdownSeconds] = useState<number>(0);
   const [latestNumber, setLatestNumber] = useState<number | null>(null);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [audioUnlocked, setAudioUnlocked] = useState(!telegramMode);
+
+  useEffect(() => {
+    setAudioUnlocked(!telegramMode);
+  }, [telegramMode]);
 
   useEffect(() => {
     if (!token) return;
@@ -119,6 +124,11 @@ export default function GameRoom() {
 
       const number = Number(data.number);
       const audio = audioMap[number];
+      if (telegramMode && !audioUnlocked) {
+        setMessage('Tap enable audio to hear number calls in Telegram.');
+        return;
+      }
+
       if (language === 'am' && audio) {
         audio.pause();
         audio.currentTime = 0;
@@ -143,7 +153,7 @@ export default function GameRoom() {
       socket.off('number_called', handleNumberCalled);
       socket.off('game_over', handleGameOver);
     };
-  }, [stake, token, refreshBalance, language, voiceEnabled]);
+  }, [stake, token, refreshBalance, language, voiceEnabled, telegramMode, audioUnlocked]);
 
   useEffect(() => {
     if (status !== 'countdown' || !countdownEndsAt) return;
@@ -176,12 +186,39 @@ export default function GameRoom() {
         backTo="/lobby"
       />
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginBottom: 12 }}>
-        <button
-          onClick={() => setVoiceEnabled((prev) => !prev)}
-          style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid #29384a', background: voiceEnabled ? '#0f766e' : '#374151', color: '#fff', cursor: 'pointer' }}
-        >
-          {voiceEnabled ? '🔊 ድምፅ' : '🔈 ድምፅ'}
-        </button>
+        {telegramMode && !audioUnlocked ? (
+          <button
+            onClick={() => {
+              const AudioCtx = (window.AudioContext || (window as any).webkitAudioContext) as typeof AudioContext | undefined;
+              if (AudioCtx) {
+                const ctx = new AudioCtx();
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(0, ctx.currentTime);
+                const osc = ctx.createOscillator();
+                osc.connect(gain).connect(ctx.destination);
+                osc.start();
+                setTimeout(() => {
+                  osc.stop();
+                  ctx.close();
+                  setAudioUnlocked(true);
+                }, 50);
+              } else {
+                setAudioUnlocked(true);
+              }
+              setVoiceEnabled(true);
+            }}
+            style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid #29384a', background: '#f59e0b', color: '#fff', cursor: 'pointer' }}
+          >
+            Enable Telegram audio
+          </button>
+        ) : (
+          <button
+            onClick={() => setVoiceEnabled((prev) => !prev)}
+            style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid #29384a', background: voiceEnabled ? '#0f766e' : '#374151', color: '#fff', cursor: 'pointer' }}
+          >
+            {voiceEnabled ? '🔊 ድምፅ' : '🔈 ድምፅ'}
+          </button>
+        )}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10, background: '#111827', color: '#cbd5e1', border: '1px solid rgba(148, 163, 184, 0.16)' }}>
           <span style={{ fontSize: 14 }}>{telegramMode ? '📱 Telegram mini app audio mode' : '💻 Web audio mode'}</span>
         </div>

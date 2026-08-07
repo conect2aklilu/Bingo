@@ -51,9 +51,11 @@ export default function Lobby() {
         balance={Number(user?.balance ?? 0)}
         language={language}
         setLanguage={(lang) => setLanguage(lang as any)}
-        showLogout
+        showAdminLink={Boolean(user?.is_admin || (user as any)?.isAdmin)}
+        adminLink="/admin"
         showWalletLink
         walletLink="/wallet"
+        showLogout
         onLogout={logout}
       />
 

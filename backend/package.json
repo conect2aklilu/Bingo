@@ -4,6 +4,7 @@
   "type": "commonjs",
   "main": "src/index.js",
   "scripts": {
+    "prestart": "npm run build --prefix ../frontend",
     "start": "node src/migrate.js && node src/index.js",
     "dev": "node src/index.js",
     "migrate": "node src/migrate.js"

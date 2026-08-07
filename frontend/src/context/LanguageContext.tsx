@@ -22,7 +22,7 @@ const translations: Record<string, Record<Language, string>> = {
   deposit: { en: 'Deposit', am: 'ተቀማጭ' },
   depositInstructions: {
     en: 'Send to the CBE account or Telebirr phone below, then submit the deposit details for verification.',
-    am: 'ወደ ዝቅተኛው የCBE ሂሳብ ወይም የTelebirr ስልክ ቁጥር ገንዘብ ላክ፣ በኋላ ዝርዝሩን ያስገቡ።',
+    am: 'ከዚህ በታች ወዳለው የCBE አካውንት ወይም የቴሌብር (Telebirr) ስልክ ቁጥር ገንዘብ ይላኩ፤ ከዚያም ለማረጋገጫ እንዲሆን የተቀማጭ ገንዘቡን ዝርዝር መረጃ ያስገቡ።',
   },
   cbeAccount: { en: 'CBE account', am: 'የCBE ሂሳብ' },
   telebirrPhone: { en: 'Telebirr phone', am: 'የTelebirr ስልክ' },

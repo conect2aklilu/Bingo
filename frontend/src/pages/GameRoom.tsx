@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { getSocket } from '../socket';
+import { connectSocket, getSocket } from '../socket';
 import { useAuth } from '../context/AuthContext';
 import BingoCard from '../components/BingoCard';
 
@@ -8,7 +8,7 @@ export default function GameRoom() {
   const { stake } = useParams();
   const location = useLocation();
   const nav = useNavigate();
-  const { refreshBalance } = useAuth();
+  const { refreshBalance, token } = useAuth();
 
   const initialCards = (location.state as any)?.cards || [];
   const [cards] = useState<number[][][]>(initialCards);
@@ -19,33 +19,37 @@ export default function GameRoom() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const socket = getSocket();
-    if (!socket) return;
+    if (!token) return;
 
+    const socket = getSocket() || connectSocket(token);
     socket.emit('join_table', Number(stake));
 
-    socket.on('table_state', (t: any) => {
+    const handleTableState = (t: any) => {
       setStatus(t.status);
       setCalledNumbers(t.calledNumbers || []);
       setCountdownEndsAt(t.countdownEndsAt || null);
-    });
+    };
 
-    socket.on('number_called', (data: any) => {
+    const handleNumberCalled = (data: any) => {
       setCalledNumbers(data.calledNumbers);
-    });
+    };
 
-    socket.on('game_over', (data: any) => {
+    const handleGameOver = (data: any) => {
       setResult(data);
       refreshBalance().catch(() => {});
-    });
+    };
+
+    socket.on('table_state', handleTableState);
+    socket.on('number_called', handleNumberCalled);
+    socket.on('game_over', handleGameOver);
 
     return () => {
       socket.emit('leave_table', Number(stake));
-      socket.off('table_state');
-      socket.off('number_called');
-      socket.off('game_over');
+      socket.off('table_state', handleTableState);
+      socket.off('number_called', handleNumberCalled);
+      socket.off('game_over', handleGameOver);
     };
-  }, [stake]);
+  }, [stake, token, refreshBalance]);
 
   function claim(cardIndex: number) {
     const socket = getSocket();

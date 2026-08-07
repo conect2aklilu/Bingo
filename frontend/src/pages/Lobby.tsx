@@ -52,6 +52,8 @@ export default function Lobby() {
         language={language}
         setLanguage={(lang) => setLanguage(lang as any)}
         showLogout
+        showWalletLink
+        walletLink="/wallet"
         onLogout={logout}
       />
 

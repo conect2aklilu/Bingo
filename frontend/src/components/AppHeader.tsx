@@ -10,6 +10,8 @@ interface AppHeaderProps {
   setLanguage: (lang: Language) => void;
   showLogout?: boolean;
   onLogout?: () => void;
+  showWalletLink?: boolean;
+  walletLink?: string;
   backTo?: string;
 }
 
@@ -21,6 +23,8 @@ export default function AppHeader({
   setLanguage,
   showLogout,
   onLogout,
+  showWalletLink,
+  walletLink,
   backTo,
 }: AppHeaderProps) {
   return (
@@ -82,6 +86,22 @@ export default function AppHeader({
           <option value="en">English</option>
           <option value="am">አማርኛ</option>
         </select>
+        {showWalletLink && walletLink ? (
+          <Link
+            to={walletLink}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 10,
+              border: '1px solid rgba(37, 99, 235, 0.4)',
+              background: '#0d9488',
+              color: '#ffffff',
+              textDecoration: 'none',
+              fontWeight: 700,
+            }}
+          >
+            Wallet
+          </Link>
+        ) : null}
         {showLogout && onLogout ? (
           <button
             onClick={onLogout}

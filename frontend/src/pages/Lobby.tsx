@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import AppHeader from '../components/AppHeader';
 
 interface TableInfo {
   stake: number;
@@ -45,21 +46,15 @@ export default function Lobby() {
 
   return (
     <div style={{ width: 'min(100%, 720px)', margin: '24px auto', padding: 16 }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-        <h2 style={{ margin: 0 }}>🎮 {t('brand')}</h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
-          <span>💰 {Number(user?.balance ?? 0).toFixed(2)} Birr</span>
-          <select value={language} onChange={(e) => setLanguage(e.target.value as any)} style={{ marginRight: 0, padding: '4px 8px', borderRadius: 6, border: '1px solid #29384a', background: '#0f1720', color: '#eef2f6' }}>
-            <option value="en">English</option>
-            <option value="am">አማርኛ</option>
-          </select>
-          <Link to="/wallet" style={{ marginRight: 0 }}>{t('walletTitle')}</Link>
-          {(user?.is_admin || user?.isAdmin) && <Link to="/admin" style={{ marginRight: 0 }}>{t('adminPanel')}</Link>}
-          <button onClick={logout} style={{ background: 'none', border: '1px solid #29384a', color: '#eef2f6', padding: '6px 10px', borderRadius: 6, cursor: 'pointer' }}>
-            Logout
-          </button>
-        </div>
-      </div>
+      <AppHeader
+        title={t('brandTitle')}
+        subtitle={t('brandSubtitle')}
+        balance={Number(user?.balance ?? 0)}
+        language={language}
+        setLanguage={(lang) => setLanguage(lang as any)}
+        showLogout
+        onLogout={logout}
+      />
 
       {error && <div style={{ color: '#f87171', marginBottom: 12 }}>{error}</div>}
 

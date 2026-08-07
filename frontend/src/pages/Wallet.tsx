@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { api } from '../api';
+import AppHeader from '../components/AppHeader';
+import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { inputStyle, buttonStyle } from './Login';
 
 export default function Wallet() {
+  const { logout } = useAuth();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [depositAmount, setDepositAmount] = useState('');
@@ -70,13 +72,15 @@ export default function Wallet() {
 
   return (
     <div style={{ width: 'min(100%, 700px)', margin: '24px auto', padding: 16 }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-        <Link to="/lobby">{t('backToLobby')}</Link>
-        <select value={language} onChange={(e) => setLanguage(e.target.value as any)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #29384a', background: '#0f1720', color: '#eef2f6' }}>
-          <option value="en">English</option>
-          <option value="am">አማርኛ</option>
-        </select>
-      </div>
+      <AppHeader
+        title={t('walletTitle')}
+        subtitle={t('depositInstructions')}
+        balance={Number(balance)}
+        language={language}
+        setLanguage={(lang) => setLanguage(lang as any)}
+        showLogout
+        onLogout={logout}
+      />
       <h2>💰 {t('walletTitle')} — {t('balance')}: {Number(balance).toFixed(2)} Birr</h2>
       {message && <div style={{ color: '#fbbf24', margin: '10px 0' }}>{message}</div>}
 
@@ -84,8 +88,16 @@ export default function Wallet() {
         <form onSubmit={submitDeposit} style={{ background: '#1a2432', padding: 16, borderRadius: 10 }}>
           <h3>{t('deposit')}</h3>
           <p style={{ fontSize: 13, color: '#9fb0c3' }}>
-            Send money via bank transfer or mobile money to the platform's account, then submit the details below for admin verification.
+            {t('depositInstructions')}
           </p>
+          <div style={{ background: '#111827', border: '1px solid #273449', padding: 12, borderRadius: 10, marginBottom: 14 }}>
+            <div style={{ color: '#cbd5e1', marginBottom: 6 }}>
+              <strong>{t('cbeAccount')}:</strong> {t('cbeAccountNumber')}
+            </div>
+            <div style={{ color: '#cbd5e1' }}>
+              <strong>{t('telebirrPhone')}:</strong> {t('telebirrPhoneNumber')}
+            </div>
+          </div>
           <input placeholder={t('amount')} value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} style={inputStyle} />
           <select value={depositMethod} onChange={(e) => setDepositMethod(e.target.value)} style={inputStyle}>
             <option value="bank_transfer">Bank Transfer</option>

@@ -3,7 +3,9 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 export type Language = 'en' | 'am';
 
 const translations: Record<string, Record<Language, string>> = {
-  brand: { en: 'AJ', am: 'AJ' },
+  brand: { en: 'AJ Bingo', am: 'AJ ቢንጎ' },
+  brandTitle: { en: 'AJ Bingo', am: 'AJ ቢንጎ' },
+  brandSubtitle: { en: 'Live Amharic bingo with style', am: 'የአማርኛ ቢንጎ በዋና ግምገማ' },
   loginTitle: { en: 'Welcome back', am: 'እንኳን በደህና ተመለሱ' },
   registerTitle: { en: 'Create account', am: 'መለያ ይፍጠሩ' },
   username: { en: 'Username', am: 'የተጠቃሚ ስም' },
@@ -18,6 +20,14 @@ const translations: Record<string, Record<Language, string>> = {
   backToLobby: { en: '← Back to Lobby', am: '← ወደ ሎብቢ ተመለስ' },
   balance: { en: 'Balance', am: 'ቀሪ ሂሳብ' },
   deposit: { en: 'Deposit', am: 'ተቀማጭ' },
+  depositInstructions: {
+    en: 'Send to the CBE account or Telebirr phone below, then submit the deposit details for verification.',
+    am: 'ወደ ዝቅተኛው የCBE ሂሳብ ወይም የTelebirr ስልክ ቁጥር ገንዘብ ላክ፣ በኋላ ዝርዝሩን ያስገቡ።',
+  },
+  cbeAccount: { en: 'CBE account', am: 'የCBE ሂሳብ' },
+  telebirrPhone: { en: 'Telebirr phone', am: 'የTelebirr ስልክ' },
+  telebirrPhoneNumber: { en: '0925660565', am: '0925660565' },
+  cbeAccountNumber: { en: '1000181219398', am: '1000181219398' },
   withdraw: { en: 'Withdraw', am: 'ይውጣ' },
   amount: { en: 'Amount', am: 'መጠን' },
   transactionReference: { en: 'Transaction reference', am: 'የግብይት ማጣቀሻ' },

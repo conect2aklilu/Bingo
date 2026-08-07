@@ -3,7 +3,66 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { connectSocket, getSocket } from '../socket';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import AppHeader from '../components/AppHeader';
 import BingoCard from '../components/BingoCard';
+
+function amharicNumberText(number: number) {
+  const names: Record<number, string> = {
+    0: 'ሜዳ',
+    1: 'አንድ',
+    2: 'ሁለት',
+    3: 'ሶስት',
+    4: 'አራት',
+    5: 'አምስት',
+    6: 'ስድስት',
+    7: 'ሰባት',
+    8: 'ስምንት',
+    9: 'ዘጠኝ',
+    10: 'አስር',
+    11: 'አስራ አንድ',
+    12: 'አስራ ሁለት',
+    13: 'አስራ ሶስት',
+    14: 'አስራ አራት',
+    15: 'አስራ አምስት',
+    16: 'አስራ ስድስት',
+    17: 'አስራ ሰባት',
+    18: 'አስራ ስምንት',
+    19: 'አስራ ዘጠኝ',
+    20: 'ሃያ',
+    30: 'ሰላሳ',
+    40: 'አርባ',
+    50: 'ሃምሳ',
+    60: 'ስልሳ',
+    70: 'ሰባ',
+    80: 'ሰማንድ',
+    90: 'ዘጠና',
+  };
+  if (number <= 20 || number % 10 === 0) return names[number] || number.toString();
+  const tens = Math.floor(number / 10) * 10;
+  const ones = number % 10;
+  return `${names[tens]} ${names[ones]}`;
+}
+
+function speakNumber(number: number, language: string) {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  const text = language === 'am' ? `ቁጥር ${amharicNumberText(number)}` : `Number ${number}`;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = language === 'am' ? 'am-ET' : 'en-US';
+  utterance.rate = 0.95;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length > 0) {
+    utterance.voice = voices.find((voice) => voice.lang.startsWith(language === 'am' ? 'am' : 'en')) || voices[0];
+  }
+  window.speechSynthesis.cancel();
+  const callSpeak = () => window.speechSynthesis.speak(utterance);
+  if (voices.length === 0) {
+    window.speechSynthesis.onvoiceschanged = callSpeak;
+  } else {
+    callSpeak();
+  }
+}
 
 export default function GameRoom() {
   const { stake } = useParams();
@@ -43,11 +102,8 @@ export default function GameRoom() {
     const handleNumberCalled = (data: any) => {
       setCalledNumbers(data.calledNumbers);
       setLatestNumber(data.number);
-      if (voiceEnabled && typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(data.number.toString());
-        utterance.lang = 'am-ET';
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(utterance);
+      if (voiceEnabled) {
+        speakNumber(data.number, language);
       }
     };
 
@@ -89,25 +145,25 @@ export default function GameRoom() {
 
   return (
     <div style={{ width: 'min(100%, 900px)', margin: '30px auto', padding: 16 }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-        <button onClick={() => nav('/lobby')} style={{ background: 'none', border: '1px solid #29384a', color: '#eef2f6', padding: '6px 10px', borderRadius: 6, cursor: 'pointer' }}>
-          {t('backToLobby')}
+      <AppHeader
+        title={t('brandTitle')}
+        subtitle={`${t('table')}: ${stake} Birr`}
+        language={language}
+        setLanguage={(lang) => setLanguage(lang as any)}
+        showLogout
+        onLogout={() => window.location.href = '/login'}
+        backTo="/lobby"
+      />
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginBottom: 12 }}>
+        <button
+          onClick={() => setVoiceEnabled((prev) => !prev)}
+          style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid #29384a', background: voiceEnabled ? '#0f766e' : '#374151', color: '#fff', cursor: 'pointer' }}
+        >
+          {voiceEnabled ? '🔊 ድምፅ' : '🔈 ድምፅ'}
         </button>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-          <button
-            onClick={() => setVoiceEnabled((prev) => !prev)}
-            style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid #29384a', background: voiceEnabled ? '#0f766e' : '#374151', color: '#fff', cursor: 'pointer' }}
-          >
-            {voiceEnabled ? '🔊 ድምፅ' : '🔈 ድምፅ'}
-          </button>
-          <select value={language} onChange={(e) => setLanguage(e.target.value as any)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #29384a', background: '#0f1720', color: '#eef2f6' }}>
-            <option value="en">English</option>
-            <option value="am">አማርኛ</option>
-          </select>
-        </div>
       </div>
 
-      <h2>{t('brand')} — {t('table')}: {stake} Birr</h2>
+      <h2>{t('brandTitle')} — {t('table')}: {stake} Birr</h2>
       <p>{t('status')}: <b>{status}</b></p>
 
       {status === 'countdown' && countdownEndsAt && (

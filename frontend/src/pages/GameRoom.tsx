@@ -119,14 +119,26 @@ export default function GameRoom() {
       {message && <div style={{ color: '#fbbf24', marginBottom: 10 }}>{message}</div>}
 
       {result && (
-        <div style={{ background: '#1a2432', padding: 16, borderRadius: 10, marginBottom: 16 }}>
-          {result.cancelled ? (
-            <p>Round cancelled — stakes refunded.</p>
-          ) : (
-            <p>
-              🏆 Winner: user #{result.winnerId} ({result.pattern}) — payout {result.payout} Birr
-            </p>
-          )}
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: 'linear-gradient(135deg, #0f766e, #2563eb)', padding: 24, borderRadius: 16, maxWidth: 420, width: '90%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}>
+            <div style={{ fontSize: 48, marginBottom: 8 }}>🏆</div>
+            {result.cancelled ? (
+              <h2 style={{ margin: '0 0 8px' }}>Round cancelled</h2>
+            ) : (
+              <>
+                <h2 style={{ margin: '0 0 8px' }}>Winner!</h2>
+                <p style={{ margin: '0 0 8px', fontSize: 18 }}>
+                  User #{result.winnerId} completed {result.pattern}
+                </p>
+                <p style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>
+                  Payout: {result.payout} Birr
+                </p>
+              </>
+            )}
+            <button onClick={() => setResult(null)} style={{ marginTop: 16, padding: '10px 16px', borderRadius: 8, border: 'none', background: '#fff', color: '#0f1720', fontWeight: 700, cursor: 'pointer' }}>
+              Close
+            </button>
+          </div>
         </div>
       )}
 

@@ -20,8 +20,9 @@ router.get('/me', async (req, res) => {
 router.post('/deposit-request', async (req, res) => {
   const { amount, method, reference } = req.body;
   const amt = Number(amount);
-  if (!amt || amt <= 0) return res.status(400).json({ error: 'Invalid amount' });
+  if (!Number.isFinite(amt) || amt < 50) return res.status(400).json({ error: 'Minimum deposit is 50 Birr' });
   if (!method || !reference) return res.status(400).json({ error: 'Payment method and reference are required' });
+  if (String(reference).trim().length < 2) return res.status(400).json({ error: 'Reference must be at least 2 characters' });
 
   const result = await pool.query(
     `INSERT INTO transactions (user_id, type, amount, status, method, reference)
@@ -37,14 +38,20 @@ router.post('/deposit-request', async (req, res) => {
 router.post('/withdraw-request', async (req, res) => {
   const { amount, method, account_details } = req.body;
   const amt = Number(amount);
-  if (!amt || amt <= 0) return res.status(400).json({ error: 'Invalid amount' });
+  if (!Number.isFinite(amt) || amt <= 0) return res.status(400).json({ error: 'Invalid amount' });
+  if (amt > 100000) return res.status(400).json({ error: 'Withdrawal amount exceeds the daily limit' });
   if (!method || !account_details) return res.status(400).json({ error: 'Payment method and account details required' });
+  if (String(account_details).trim().length < 3) return res.status(400).json({ error: 'Account details must be at least 3 characters' });
 
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     const userResult = await client.query('SELECT balance FROM users WHERE id = $1 FOR UPDATE', [req.user.id]);
     const balance = Number(userResult.rows[0].balance);
+    if (!Number.isFinite(balance) || balance < 0) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: 'Invalid balance state' });
+    }
     if (balance < amt) {
       await client.query('ROLLBACK');
       return res.status(400).json({ error: 'Insufficient balance' });

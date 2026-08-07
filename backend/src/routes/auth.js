@@ -91,9 +91,18 @@ router.post('/register', async (req, res) => {
   const { username, password, telegram } = req.body;
   const isTelegram = Boolean(telegram?.id);
 
-  if (!username || !password || password.length < 6) {
+  if (!username || !password) {
     if (!isTelegram) {
-      return res.status(400).json({ error: 'Username and password (min 6 chars) required' });
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+  }
+
+  if (!isTelegram) {
+    if (String(username).trim().length < 3 || String(username).trim().length > 20) {
+      return res.status(400).json({ error: 'Username must be between 3 and 20 characters' });
+    }
+    if (!/^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(password)) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters and include a letter and a number' });
     }
   }
 
@@ -157,6 +166,7 @@ router.post('/login', async (req, res) => {
     const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
     const user = result.rows[0];
     if (!user) return res.status(401).json({ error: 'Invalid username or password' });
+    if (user.is_banned) return res.status(403).json({ error: 'Account is banned' });
     if (user.is_banned) return res.status(403).json({ error: 'Account is banned' });
 
     const ok = await bcrypt.compare(password, user.password_hash);

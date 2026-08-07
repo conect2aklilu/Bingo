@@ -45,7 +45,7 @@ app.get('/', (req, res) => {
   if (frontendIndexPath && fs.existsSync(frontendIndexPath)) {
     return res.sendFile(frontendIndexPath);
   }
-  res.type('html').send(`<!doctype html><html><body><h1>Merged Bingo</h1><p>The app is running.</p></body></html>`);
+  res.type('html').send(`<!doctype html><html><body><h1>Yene Bingo</h1><p>The app is running.</p></body></html>`);
 });
 
 app.get('*', (req, res) => {

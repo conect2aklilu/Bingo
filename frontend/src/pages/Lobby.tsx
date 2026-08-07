@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface TableInfo {
   stake: number;
@@ -12,6 +13,7 @@ interface TableInfo {
 
 export default function Lobby() {
   const { user, logout, refreshBalance } = useAuth();
+  const { t, language, setLanguage } = useLanguage();
   const nav = useNavigate();
   const [tables, setTables] = useState<TableInfo[]>([]);
   const [cardCounts, setCardCounts] = useState<Record<number, number>>({});
@@ -44,11 +46,15 @@ export default function Lobby() {
   return (
     <div style={{ maxWidth: 720, margin: '40px auto', padding: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h2>🎮 Lobby</h2>
+        <h2>🎮 {t('brand')}</h2>
         <div>
           <span style={{ marginRight: 16 }}>💰 {Number(user?.balance ?? 0).toFixed(2)} Birr</span>
-          <Link to="/wallet" style={{ marginRight: 16 }}>Wallet</Link>
-          {(user?.is_admin || user?.isAdmin) && <Link to="/admin" style={{ marginRight: 16 }}>Admin</Link>}
+          <select value={language} onChange={(e) => setLanguage(e.target.value as any)} style={{ marginRight: 12, padding: '4px 8px', borderRadius: 6, border: '1px solid #29384a', background: '#0f1720', color: '#eef2f6' }}>
+            <option value="en">English</option>
+            <option value="am">አማርኛ</option>
+          </select>
+          <Link to="/wallet" style={{ marginRight: 16 }}>{t('walletTitle')}</Link>
+          {(user?.is_admin || user?.isAdmin) && <Link to="/admin" style={{ marginRight: 16 }}>{t('adminPanel')}</Link>}
           <button onClick={logout} style={{ background: 'none', border: '1px solid #29384a', color: '#eef2f6', padding: '6px 10px', borderRadius: 6, cursor: 'pointer' }}>
             Logout
           </button>
@@ -58,16 +64,16 @@ export default function Lobby() {
       {error && <div style={{ color: '#f87171', marginBottom: 12 }}>{error}</div>}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        {tables.map((t) => (
-          <div key={t.stake} style={{ background: '#1a2432', borderRadius: 12, padding: 16 }}>
-            <h3>Stake: {t.stake} Birr</h3>
-            <p>Status: <b>{t.status}</b></p>
-            <p>Players: {t.playerCount}</p>
+        {tables.map((table) => (
+          <div key={table.stake} style={{ background: '#1a2432', borderRadius: 12, padding: 16 }}>
+            <h3>{t('table')}: {table.stake} Birr</h3>
+            <p>{t('status')}: <b>{table.status}</b></p>
+            <p>{t('players')}: {table.playerCount}</p>
             <label>
-              Cards (1-4):
+              {t('cards')} (1-4):
               <select
-                value={cardCounts[t.stake] || 1}
-                onChange={(e) => setCardCounts({ ...cardCounts, [t.stake]: Number(e.target.value) })}
+                value={cardCounts[table.stake] || 1}
+                onChange={(e) => setCardCounts({ ...cardCounts, [table.stake]: Number(e.target.value) })}
                 style={{ marginLeft: 8 }}
               >
                 {[1, 2, 3, 4].map((n) => (
@@ -76,8 +82,8 @@ export default function Lobby() {
               </select>
             </label>
             <button
-              onClick={() => join(t.stake)}
-              disabled={t.status === 'playing'}
+              onClick={() => join(table.stake)}
+              disabled={table.status === 'playing'}
               style={{
                 display: 'block',
                 marginTop: 10,
@@ -85,13 +91,13 @@ export default function Lobby() {
                 padding: 8,
                 borderRadius: 6,
                 border: 'none',
-                background: t.status === 'playing' ? '#374151' : '#059669',
+                background: table.status === 'playing' ? '#374151' : '#059669',
                 color: '#fff',
                 fontWeight: 700,
-                cursor: t.status === 'playing' ? 'not-allowed' : 'pointer',
+                cursor: table.status === 'playing' ? 'not-allowed' : 'pointer',
               }}
             >
-              {t.status === 'playing' ? 'In progress' : 'Join Table'}
+              {table.status === 'playing' ? t('inProgress') : t('joinTable')}
             </button>
           </div>
         ))}

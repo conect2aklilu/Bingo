@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
+import { useLanguage } from '../context/LanguageContext';
 import { inputStyle, buttonStyle } from './Login';
 
 export default function Wallet() {
@@ -13,6 +14,7 @@ export default function Wallet() {
   const [withdrawMethod, setWithdrawMethod] = useState('bank_transfer');
   const [withdrawAccount, setWithdrawAccount] = useState('');
   const [message, setMessage] = useState('');
+  const { t, language, setLanguage } = useLanguage();
 
   async function load() {
     const res = await api.get('/wallet/me');
@@ -27,8 +29,13 @@ export default function Wallet() {
   async function submitDeposit(e: React.FormEvent) {
     e.preventDefault();
     setMessage('');
+    const amount = Number(depositAmount);
+    if (!Number.isFinite(amount) || amount < 50) {
+      setMessage(t('depositMin'));
+      return;
+    }
     try {
-      await api.post('/wallet/deposit-request', { amount: depositAmount, method: depositMethod, reference: depositRef });
+      await api.post('/wallet/deposit-request', { amount, method: depositMethod, reference: depositRef });
       setMessage('Deposit request submitted. An admin will verify and credit your wallet.');
       setDepositAmount('');
       setDepositRef('');
@@ -41,8 +48,17 @@ export default function Wallet() {
   async function submitWithdraw(e: React.FormEvent) {
     e.preventDefault();
     setMessage('');
+    const amount = Number(withdrawAmount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setMessage(t('invalidAmount'));
+      return;
+    }
+    if (amount > balance) {
+      setMessage(t('insufficientBalance'));
+      return;
+    }
     try {
-      await api.post('/wallet/withdraw-request', { amount: withdrawAmount, method: withdrawMethod, account_details: withdrawAccount });
+      await api.post('/wallet/withdraw-request', { amount, method: withdrawMethod, account_details: withdrawAccount });
       setMessage('Withdrawal request submitted. Funds are reserved pending admin approval.');
       setWithdrawAmount('');
       setWithdrawAccount('');
@@ -54,43 +70,49 @@ export default function Wallet() {
 
   return (
     <div style={{ maxWidth: 700, margin: '30px auto', padding: 16 }}>
-      <Link to="/lobby">← Back to Lobby</Link>
-      <h2>💰 Wallet — Balance: {Number(balance).toFixed(2)} Birr</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <Link to="/lobby">{t('backToLobby')}</Link>
+        <select value={language} onChange={(e) => setLanguage(e.target.value as any)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #29384a', background: '#0f1720', color: '#eef2f6' }}>
+          <option value="en">English</option>
+          <option value="am">አማርኛ</option>
+        </select>
+      </div>
+      <h2>💰 {t('walletTitle')} — {t('balance')}: {Number(balance).toFixed(2)} Birr</h2>
       {message && <div style={{ color: '#fbbf24', margin: '10px 0' }}>{message}</div>}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 20 }}>
         <form onSubmit={submitDeposit} style={{ background: '#1a2432', padding: 16, borderRadius: 10 }}>
-          <h3>Deposit</h3>
+          <h3>{t('deposit')}</h3>
           <p style={{ fontSize: 13, color: '#9fb0c3' }}>
             Send money via bank transfer or mobile money to the platform's account, then submit the details below for admin verification.
           </p>
-          <input placeholder="Amount" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} style={inputStyle} />
+          <input placeholder={t('amount')} value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} style={inputStyle} />
           <select value={depositMethod} onChange={(e) => setDepositMethod(e.target.value)} style={inputStyle}>
             <option value="bank_transfer">Bank Transfer</option>
             <option value="telebirr">Telebirr</option>
             <option value="cbe_birr">CBE Birr</option>
           </select>
-          <input placeholder="Transaction reference" value={depositRef} onChange={(e) => setDepositRef(e.target.value)} style={inputStyle} />
-          <button type="submit" style={buttonStyle}>Submit Deposit Request</button>
+          <input placeholder={t('transactionReference')} value={depositRef} onChange={(e) => setDepositRef(e.target.value)} style={inputStyle} />
+          <button type="submit" style={buttonStyle}>{t('submitDeposit')}</button>
         </form>
 
         <form onSubmit={submitWithdraw} style={{ background: '#1a2432', padding: 16, borderRadius: 10 }}>
-          <h3>Withdraw</h3>
+          <h3>{t('withdraw')}</h3>
           <p style={{ fontSize: 13, color: '#9fb0c3' }}>
             Funds are held in your wallet until an admin sends the payout and approves the request.
           </p>
-          <input placeholder="Amount" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} style={inputStyle} />
+          <input placeholder={t('amount')} value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} style={inputStyle} />
           <select value={withdrawMethod} onChange={(e) => setWithdrawMethod(e.target.value)} style={inputStyle}>
             <option value="bank_transfer">Bank Transfer</option>
             <option value="telebirr">Telebirr</option>
             <option value="cbe_birr">CBE Birr</option>
           </select>
-          <input placeholder="Account details" value={withdrawAccount} onChange={(e) => setWithdrawAccount(e.target.value)} style={inputStyle} />
-          <button type="submit" style={buttonStyle}>Submit Withdrawal Request</button>
+          <input placeholder={t('accountDetails')} value={withdrawAccount} onChange={(e) => setWithdrawAccount(e.target.value)} style={inputStyle} />
+          <button type="submit" style={buttonStyle}>{t('submitWithdraw')}</button>
         </form>
       </div>
 
-      <h3 style={{ marginTop: 24 }}>History</h3>
+      <h3 style={{ marginTop: 24 }}>{t('history')}</h3>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ textAlign: 'left', color: '#9fb0c3' }}>

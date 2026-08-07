@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { connectSocket, getSocket } from '../socket';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { isTelegramMiniApp } from '../telegram';
 import AppHeader from '../components/AppHeader';
 import BingoCard from '../components/BingoCard';
 
@@ -70,6 +71,7 @@ export default function GameRoom() {
   const nav = useNavigate();
   const { refreshBalance, token } = useAuth();
   const { t, language, setLanguage } = useLanguage();
+  const telegramMode = isTelegramMiniApp();
 
   const audioMap = React.useMemo(() => {
     if (typeof window === 'undefined') return {} as Record<number, HTMLAudioElement>;
@@ -180,6 +182,9 @@ export default function GameRoom() {
         >
           {voiceEnabled ? '🔊 ድምፅ' : '🔈 ድምፅ'}
         </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10, background: '#111827', color: '#cbd5e1', border: '1px solid rgba(148, 163, 184, 0.16)' }}>
+          <span style={{ fontSize: 14 }}>{telegramMode ? '📱 Telegram mini app audio mode' : '💻 Web audio mode'}</span>
+        </div>
       </div>
 
       <h2>{t('brandTitle')} — {t('table')}: {stake} Birr</h2>

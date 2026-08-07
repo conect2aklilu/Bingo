@@ -4,9 +4,9 @@ const { generateCards, checkWin } = require('./bingoLogic');
 const STAKE_TIERS = (process.env.STAKE_TIERS || '10,50,100,200')
   .split(',')
   .map((s) => Number(s.trim()));
-const CALL_INTERVAL_MS = Number(process.env.CALL_INTERVAL_MS || 2500);
+const CALL_INTERVAL_MS = Number(process.env.CALL_INTERVAL_MS || 1500);
 const PLATFORM_FEE_PERCENT = Number(process.env.PLATFORM_FEE_PERCENT || 25);
-const COUNTDOWN_SECONDS = 30;
+const COUNTDOWN_SECONDS = 60;
 const MIN_PLAYERS_TO_START = 2;
 
 // In-memory table state, keyed by stake. Each table has at most one

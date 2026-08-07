@@ -48,7 +48,6 @@ export default function Lobby() {
     <div style={{ width: 'min(100%, 720px)', margin: '24px auto', padding: 16 }}>
       <AppHeader
         title={t('brandTitle')}
-        subtitle={t('brandSubtitle')}
         balance={Number(user?.balance ?? 0)}
         language={language}
         setLanguage={(lang) => setLanguage(lang as any)}

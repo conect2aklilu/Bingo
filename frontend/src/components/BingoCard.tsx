@@ -1,17 +1,19 @@
-import React from 'react';
+import { type FC } from 'react';
 
 const HEADERS = ['B', 'I', 'N', 'G', 'O'];
 const COLORS = ['#e11d48', '#2563eb', '#059669', '#d97706', '#7c3aed'];
 
-export default function BingoCard({
-  grid,
-  calledNumbers,
-  onClaim,
-}: {
+type BingoCardProps = {
   grid: number[][];
   calledNumbers: number[];
   onClaim?: () => void;
-}) {
+};
+
+const BingoCard: FC<BingoCardProps> = ({
+  grid,
+  calledNumbers,
+  onClaim,
+}) => {
   const calledSet = new Set(calledNumbers);
   const isMarked = (v: number) => v === 0 || calledSet.has(v);
 
@@ -77,4 +79,6 @@ export default function BingoCard({
       )}
     </div>
   );
-}
+};
+
+export default BingoCard;

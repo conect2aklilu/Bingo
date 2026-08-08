@@ -93,6 +93,7 @@ export default function GameRoom() {
   const [message, setMessage] = useState('');
   const [countdownSeconds, setCountdownSeconds] = useState<number>(0);
   const [latestNumber, setLatestNumber] = useState<number | null>(null);
+  const [latestCall, setLatestCall] = useState<string>('');
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [audioUnlocked, setAudioUnlocked] = useState(!telegramMode);
 
@@ -110,19 +111,17 @@ export default function GameRoom() {
       setStatus(t.status);
       setCalledNumbers(t.calledNumbers || []);
       setCountdownEndsAt(t.countdownEndsAt || null);
-      if (t.status === 'countdown' && t.countdownEndsAt) {
-        setCountdownSeconds(Math.max(0, Math.ceil((t.countdownEndsAt - Date.now()) / 1000)));
-      } else {
-        setCountdownSeconds(0);
-      }
+      setCountdownSeconds(t.countdownSeconds || 0);
     };
 
     const handleNumberCalled = (data: any) => {
       setCalledNumbers(data.calledNumbers);
       setLatestNumber(data.number);
+      const number = Number(data.number);
+      const letter = ['B', 'I', 'N', 'G', 'O'][Math.floor((number - 1) / 15)] || '';
+      setLatestCall(`${letter}-${number}`);
       if (!voiceEnabled) return;
 
-      const number = Number(data.number);
       const audio = audioMap[number];
       if (telegramMode && !audioUnlocked) {
         setMessage('Tap enable audio to hear number calls in Telegram.');
@@ -245,7 +244,7 @@ export default function GameRoom() {
               <>
                 <h2 style={{ margin: '0 0 8px' }}>Winner!</h2>
                 <p style={{ margin: '0 0 8px', fontSize: 18 }}>
-                  User #{result.winnerId} completed {result.pattern}
+                  {result.winnerUsername ? result.winnerUsername : `User #${result.winnerId}`} completed {result.pattern}
                 </p>
                 <p style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>
                   Payout: {result.payout} Birr
@@ -261,7 +260,7 @@ export default function GameRoom() {
 
       {latestNumber !== null && (
         <div style={{ marginBottom: 10, background: '#0f766e', padding: 10, borderRadius: 8 }}>
-          <b>{t('latestNumber')}: {latestNumber}</b>
+          <b>{t('latestNumber')}: {latestCall || latestNumber}</b>
         </div>
       )}
 
@@ -276,7 +275,7 @@ export default function GameRoom() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         {cards.map((grid, i) => (
           <BingoCard key={i} grid={grid} calledNumbers={calledNumbers} onClaim={() => claim(i)} />
         ))}

@@ -18,8 +18,8 @@ const BingoCard: FC<BingoCardProps> = ({
   const isMarked = (v: number) => v === 0 || calledSet.has(v);
 
   return (
-    <div style={{ display: 'inline-block', background: '#1a2432', padding: 10, borderRadius: 10 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 42px)', gap: 4, marginBottom: 4 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', maxWidth: 360, background: '#1a2432', padding: 10, borderRadius: 10 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 4, marginBottom: 4 }}>
         {HEADERS.map((h, i) => (
           <div
             key={h}
@@ -34,7 +34,7 @@ const BingoCard: FC<BingoCardProps> = ({
           </div>
         ))}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 42px)', gridTemplateRows: 'repeat(5, 42px)', gap: 4 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 4 }}>
         {grid.map((row, r) =>
           row.map((val, c) => {
             const marked = isMarked(val);
@@ -51,6 +51,8 @@ const BingoCard: FC<BingoCardProps> = ({
                   background: marked ? '#16a34a' : '#0f1720',
                   color: marked ? '#fff' : '#9fb0c3',
                   border: '1px solid #29384a',
+                  aspectRatio: '1 / 1',
+                  minHeight: 42,
                 }}
               >
                 {val === 0 ? 'FREE' : val}

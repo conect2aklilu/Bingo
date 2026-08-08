@@ -28,6 +28,7 @@ function roomName(stake) {
 }
 
 function publicTableState(table) {
+  const countdownSeconds = table.countdownEndsAt ? Math.max(0, Math.ceil((table.countdownEndsAt - Date.now()) / 1000)) : 0;
   return {
     stake: table.stake,
     gameId: table.gameId,
@@ -35,6 +36,7 @@ function publicTableState(table) {
     playerCount: table.players.size,
     calledNumbers: table.calledNumbers,
     countdownEndsAt: table.countdownEndsAt,
+    countdownSeconds,
   };
 }
 
@@ -183,7 +185,18 @@ async function endGame(table, { winnerId, pattern, cancelled }) {
       [winnerId, pattern, payout, fee, pot, gameId]
     );
 
-    ioRef.to(roomName(stake)).emit('game_over', { gameId, winnerId, pattern, payout, platformFee: fee, cancelled: false });
+    const winnerResult = await pool.query(`SELECT username FROM users WHERE id = $1`, [winnerId]);
+    const winnerUsername = winnerResult.rows[0]?.username || null;
+
+    ioRef.to(roomName(stake)).emit('game_over', {
+      gameId,
+      winnerId,
+      winnerUsername,
+      pattern,
+      payout,
+      platformFee: fee,
+      cancelled: false,
+    });
   }
 
   // Reset table for next round.

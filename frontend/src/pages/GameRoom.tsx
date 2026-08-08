@@ -75,9 +75,10 @@ export default function GameRoom() {
 
   const audioMap = React.useMemo(() => {
     if (typeof window === 'undefined') return {} as Record<number, HTMLAudioElement>;
+    const baseUrl = window.location.origin;
     const map: Record<number, HTMLAudioElement> = {};
     for (let i = 1; i <= 75; i += 1) {
-      const audio = new Audio(`/audio/am/number-${String(i).padStart(2, '0')}.mp3`);
+      const audio = new Audio(`${baseUrl}/audio/am/number-${String(i).padStart(2, '0')}.mp3`);
       audio.preload = 'auto';
       map[i] = audio;
     }
@@ -110,8 +111,22 @@ export default function GameRoom() {
     const handleTableState = (t: any) => {
       setStatus(t.status);
       setCalledNumbers(t.calledNumbers || []);
-      setCountdownEndsAt(t.countdownEndsAt || null);
-      setCountdownSeconds(t.countdownSeconds || 0);
+      const countdownEndValue = typeof t.countdownEndsAt === 'number'
+        ? t.countdownEndsAt
+        : typeof t.countdownEndsAt === 'string'
+          ? Number(t.countdownEndsAt)
+          : null;
+      const validCountdownEndsAt = Number.isFinite(countdownEndValue) ? countdownEndValue : null;
+      setCountdownEndsAt(validCountdownEndsAt);
+
+      const serverSeconds = typeof t.countdownSeconds === 'number' ? t.countdownSeconds : NaN;
+      const fallbackSeconds = validCountdownEndsAt ? Math.max(0, Math.ceil((validCountdownEndsAt - Date.now()) / 1000)) : 0;
+      const seconds = Number.isFinite(serverSeconds) && serverSeconds >= 0 ? serverSeconds : fallbackSeconds;
+      if (t.status === 'countdown' && seconds <= 0) {
+        setCountdownSeconds(60);
+      } else {
+        setCountdownSeconds(seconds);
+      }
     };
 
     const handleNumberCalled = (data: any) => {
@@ -131,7 +146,11 @@ export default function GameRoom() {
       if (language === 'am' && audio) {
         audio.pause();
         audio.currentTime = 0;
+        audio.load();
         audio.play().catch(() => speakNumber(number, language));
+      } else if (language === 'am' && telegramMode) {
+        // Use speech synthesis fallback when audio cannot be played in Telegram.
+        speakNumber(number, language);
       } else {
         speakNumber(number, language);
       }

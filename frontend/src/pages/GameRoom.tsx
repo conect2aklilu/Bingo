@@ -75,10 +75,9 @@ export default function GameRoom() {
 
   const audioMap = React.useMemo(() => {
     if (typeof window === 'undefined') return {} as Record<number, HTMLAudioElement>;
-    const baseUrl = window.location.origin;
     const map: Record<number, HTMLAudioElement> = {};
     for (let i = 1; i <= 75; i += 1) {
-      const audio = new Audio(`${baseUrl}/audio/am/number-${String(i).padStart(2, '0')}.mp3`);
+      const audio = new Audio(`/audio/am/number-${String(i).padStart(2, '0')}.mp3`);
       audio.preload = 'auto';
       map[i] = audio;
     }
@@ -120,13 +119,9 @@ export default function GameRoom() {
       setCountdownEndsAt(validCountdownEndsAt);
 
       const serverSeconds = typeof t.countdownSeconds === 'number' ? t.countdownSeconds : NaN;
-      const fallbackSeconds = validCountdownEndsAt ? Math.max(0, Math.ceil((validCountdownEndsAt - Date.now()) / 1000)) : 0;
-      const seconds = Number.isFinite(serverSeconds) && serverSeconds >= 0 ? serverSeconds : fallbackSeconds;
-      if (t.status === 'countdown' && seconds <= 0) {
-        setCountdownSeconds(60);
-      } else {
-        setCountdownSeconds(seconds);
-      }
+      const fallbackSeconds = validCountdownEndsAt ? Math.max(0, Math.ceil((validCountdownEndsAt - Date.now()) / 1000)) : NaN;
+      const seconds = Number.isFinite(serverSeconds) && serverSeconds >= 0 ? serverSeconds : Number.isFinite(fallbackSeconds) ? fallbackSeconds : 0;
+      setCountdownSeconds(seconds);
     };
 
     const handleNumberCalled = (data: any) => {
